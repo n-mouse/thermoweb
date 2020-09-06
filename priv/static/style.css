@@ -1,0 +1,19 @@
+.container {
+    padding: 40px 60px;
+    line-height: 1.2;
+    color: #666;
+}
+
+.box {
+    padding-bottom: 10px;
+}
+
+.boxes {
+    width: 30%; 
+    float: left;
+}
+
+.chart-container {
+    width: 70%; 
+    float: right;
+}

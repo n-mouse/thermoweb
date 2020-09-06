@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>Hello Thermo</title>
+    <link rel="stylesheet" href="style.css"/>
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/chartist.js/latest/chartist.min.css">
+  </head>
+  <body>    
+    <div class="container">
+        <div class="boxes">
+            <div class="box">
+                <input type="text" name="temp" id="temp" placeholder="temperature">
+                <input type="text" name="time" id="time" placeholder="time">
+            </div>
+        </div>
+        <div class="chart-container"> 
+            <div class="plan_chart ct-major-seventh"></div>
+        </div>
+     <div>
+    <button id="more">More</button>
+    <button id="send">Send</button>
+
+    <script src="//cdn.jsdelivr.net/chartist.js/latest/chartist.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.1/mqttws31.min.js" type="text/javascript"></script>
+        <script>
+
+        // add more steps
+
+        document.querySelector("#more").addEventListener("click", (e) => {
+            var div = document.createElement("div");
+            div.setAttribute("class","box");
+            var input1 = '<input type="text" name="temp" id="temp" placeholder="temperature"> ';
+            var input2 = '<input type="text" name="time" id="time" placeholder="time">';
+            div.innerHTML = input1+input2;
+            document.querySelector(".boxes").appendChild(div); 
+        });
+
+        // charts
+
+        var planSeries = [];
+        var planChart;
+       
+        document.querySelector("#send").addEventListener("click", (e) => {
+            var values = []; //for mqtt
+            var time = [0];
+            var temp = [];
+            document.querySelectorAll(".box").forEach(box => { 
+               temp.push(box.children[0].value);
+               time.push(box.children[1].value);
+               values.push(box.children[0].value+"-"+box.children[1].value);
+            }) 
+            //temp.push(0);
+
+            var t = 0;
+            var foo = 0;
+            for (let i = 0; i<time.length; i++) {
+                var tt = t+parseInt(time[i]);
+                if (foo > 0){
+                  planSeries.push({x: tt, y: foo});
+                }
+                planSeries.push({x: tt, y: temp[i]});
+                t = t+parseInt(time[i]);
+                foo = temp[i];
+            }
+
+            planChart = new Chartist.Line('.plan_chart', {
+                series: [planSeries]
+            }, 
+            {
+                axisX: {
+                    type: Chartist.AutoScaleAxis,
+                    onlyInteger: true
+                },
+                low: 0
+            });
+
+            fetch('/send', {
+              method: 'POST', 
+              headers: {
+                  'Content-Type': 'application/json',
+              },
+                body: JSON.stringify({"values": values.reverse()}),
+            })
+            .then(response => response.json())
+            .then(data => {
+              console.log('Success:', data);
+            })
+            .catch((error) => {
+              console.error('Error:', error);
+            });
+        });
+
+    </script> 
+  </body>
+</html>
