@@ -16,4 +16,9 @@
 .chart-container {
     width: 70%; 
     float: right;
+    height: 100vh;
+}
+
+.chart {
+    height: 45%;
 }
